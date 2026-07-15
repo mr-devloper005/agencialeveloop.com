@@ -32,7 +32,7 @@ const getImages = (post: SitePost) => {
   return [...media, ...images, ...(isUrl(image) ? [image] : []), ...(isUrl(logo) ? [logo] : [])].filter(Boolean).slice(0, 8)
 }
 
-const placeholder = '/placeholder.svg?height=900&width=1200'
+const placeholder = '/favicon.png?v=20260413'
 const getImage = (post: SitePost) => getImages(post)[0] || placeholder
 const getCategory = (post: SitePost, fallback: string) => asText(getContent(post).category) || post.tags?.[0] || fallback
 // Reduce any content payload — rich HTML, entity-encoded HTML, or plain text — to a clean
@@ -60,6 +60,17 @@ const getField = (post: SitePost, keys: string[]) => {
   return ''
 }
 const cleanDomain = (value: string) => value.replace(/^https?:\/\//, '').replace(/\/$/, '')
+
+const dedupeBusinessListings = (posts: SitePost[]) => {
+  const seen = new Set<string>()
+  return posts.filter((post) => {
+    const titleKey = (post.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '')
+    const key = titleKey || post.slug || String(post.id || '')
+    if (!key || seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
 
 function pageHref(basePath: string, category: string, page: number) {
   const params = new URLSearchParams()
@@ -106,6 +117,76 @@ export function TaskArchiveView({ task, posts, pagination, category, basePath }:
   const page = pagination.page || 1
   const label = taskConfig?.label || task
   const categoryLabel = category === 'all' ? 'All categories' : CATEGORY_OPTIONS.find((item) => item.slug === category)?.name || category
+  const listingPosts = task === 'listing' ? dedupeBusinessListings(posts) : posts
+
+  if (task === 'listing') {
+    return (
+      <EditableSiteShell>
+        <main style={taskThemeStyle(task)} className="min-h-screen bg-[#f4f7f6] text-[var(--tk-text)]">
+          <header className="relative overflow-hidden bg-[#0B0909] text-white">
+            <div className="editable-glow absolute -left-24 -top-24 h-96 w-96 rounded-full bg-[#408175]/35 blur-3xl" />
+            <div className="absolute right-0 top-0 h-full w-1/2 bg-[radial-gradient(circle_at_70%_20%,rgba(181,185,240,.28),transparent_52%)]" />
+            <div className="relative mx-auto max-w-[var(--editable-container)] px-6 py-16 sm:py-20 lg:px-8">
+              <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#B5B9F0]">Business directory</p>
+              <div className="mt-4 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-end">
+                <div>
+                  <h1 className="editable-display max-w-3xl text-4xl font-extrabold leading-[1.03] tracking-[-0.05em] sm:text-6xl">Find a business that fits the job.</h1>
+                  <p className="mt-5 max-w-2xl text-base leading-8 text-white/65 sm:text-lg">Explore verified business profiles, compare services, and connect directly with providers.</p>
+                </div>
+                <form action={basePath} className="rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur-xl">
+                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">Browse category</label>
+                  <div className="mt-2 flex gap-2">
+                    <div className="relative min-w-0 flex-1">
+                      <select name="category" defaultValue={category} className="h-12 w-full appearance-none rounded-xl border-0 bg-white pl-4 pr-10 text-sm font-semibold text-[#0B0909] outline-none" aria-label="Filter business category">
+                        <option value="all">All categories</option>
+                        {CATEGORY_OPTIONS.map((item) => <option key={item.slug} value={item.slug}>{item.name}</option>)}
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#526762]" />
+                    </div>
+                    <button className="h-12 rounded-xl bg-[#408175] px-5 text-sm font-bold text-white transition hover:bg-[#2E4540]">Explore</button>
+                  </div>
+                </form>
+              </div>
+              <div className="mt-10 flex flex-wrap items-center gap-3 border-t border-white/10 pt-5 text-sm text-white/55">
+                <span className="rounded-full bg-white/10 px-4 py-2 font-semibold text-white">{listingPosts.length} businesses</span>
+                <span>{categoryLabel}</span>
+                <span className="hidden sm:inline">Direct contact details</span>
+                <span className="hidden sm:inline">Service information</span>
+              </div>
+            </div>
+          </header>
+
+          <section className="mx-auto max-w-[var(--editable-container)] px-6 py-12 sm:py-16 lg:px-8">
+            <div className="mb-8 flex items-end justify-between gap-4">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#408175]">Directory results</p>
+                <h2 className="mt-2 text-2xl font-extrabold tracking-[-0.04em] sm:text-3xl">Businesses worth exploring</h2>
+              </div>
+              <Link href="/create" className="hidden rounded-xl border border-[var(--tk-line)] bg-white px-5 py-3 text-sm font-bold transition hover:border-[#408175] sm:inline-flex">Add your business</Link>
+            </div>
+            {listingPosts.length ? (
+              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                {listingPosts.map((post) => <ListingArchiveCard key={post.id || post.slug} post={post} href={`${basePath}/${post.slug}`} />)}
+              </div>
+            ) : (
+              <div className="rounded-3xl border border-dashed border-[var(--tk-line)] bg-white px-8 py-20 text-center">
+                <Search className="mx-auto h-8 w-8 text-[#408175]" />
+                <h2 className="mt-5 text-2xl font-extrabold">No businesses found</h2>
+                <p className="mt-2 text-sm text-[var(--tk-muted)]">Try another category to discover more providers.</p>
+              </div>
+            )}
+            {listingPosts.length ? (
+              <nav className="mt-14 flex items-center justify-center gap-3 text-sm">
+                {pagination.hasPrevPage ? <Link href={pageHref(basePath, category, page - 1)} className="rounded-xl border border-[var(--tk-line)] bg-white px-5 py-3 font-semibold">Previous</Link> : null}
+                <span className="rounded-xl bg-[#2E4540] px-5 py-3 font-semibold text-white">Page {page} of {pagination.totalPages || 1}</span>
+                {pagination.hasNextPage ? <Link href={pageHref(basePath, category, page + 1)} className="rounded-xl border border-[var(--tk-line)] bg-white px-5 py-3 font-semibold">Next</Link> : null}
+              </nav>
+            ) : null}
+          </section>
+        </main>
+      </EditableSiteShell>
+    )
+  }
 
   return (
     <EditableSiteShell>
@@ -261,21 +342,27 @@ function ListingArchiveCard({ post, href }: { post: SitePost; href: string }) {
   const phone = getField(post, ['phone', 'telephone', 'mobile'])
   const website = getField(post, ['website', 'url'])
   return (
-    <Link href={href} className={`${cardBase} flex items-center gap-5 p-5 sm:p-6`}>
-      <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[1rem] border border-[var(--tk-line)] bg-[var(--tk-raised)]">
-        {logo ? <img src={logo} alt="" className="h-full w-full object-cover" /> : <BriefcaseBusiness className="h-9 w-9 text-[var(--tk-muted)]" />}
+    <Link href={href} className="group flex min-h-[300px] flex-col overflow-hidden rounded-3xl border border-[var(--tk-line)] bg-white transition duration-500 hover:-translate-y-1.5 hover:border-[#408175]/40 hover:shadow-[0_28px_70px_rgba(46,69,64,.14)]">
+      <div className="relative flex h-36 items-center justify-center overflow-hidden bg-[#2E4540]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(181,185,240,.28),transparent_48%)]" />
+        <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-white/20 bg-white shadow-xl">
+          {logo ? <img src={logo} alt="" className="h-full w-full object-cover" /> : <BriefcaseBusiness className="h-8 w-8 text-[#408175]" />}
+        </div>
+        <span className="absolute right-4 top-4 rounded-full border border-white/15 bg-black/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white/75">Business</span>
       </div>
-      <div className="min-w-0 flex-1">
-        <h2 className="editable-display truncate text-xl font-semibold tracking-[-0.02em]">{post.title}</h2>
+      <div className="flex flex-1 flex-col p-6">
+        <div className="flex items-start justify-between gap-3">
+          <h2 className="editable-display line-clamp-2 text-xl font-extrabold tracking-[-0.03em]">{post.title}</h2>
+          <ArrowUpRight className="h-5 w-5 shrink-0 text-[#408175] transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+        </div>
         <RatingLine post={post} />
-        <p className="mt-2 line-clamp-1 text-sm leading-6 text-[var(--tk-muted)]">{getSummary(post)}</p>
-        <div className="mt-3 flex flex-wrap gap-3 text-xs font-medium text-[var(--tk-muted)]">
+        <p className="mt-3 line-clamp-2 flex-1 text-sm leading-6 text-[var(--tk-muted)]">{getSummary(post)}</p>
+        <div className="mt-5 flex flex-wrap gap-3 border-t border-[var(--tk-line)] pt-4 text-xs font-semibold text-[var(--tk-muted)]">
           {location ? <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-[var(--tk-accent)]" /> {location}</span> : null}
           {phone ? <span className="inline-flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 text-[var(--tk-accent)]" /> {phone}</span> : null}
           {website ? <span className="inline-flex items-center gap-1.5"><Globe className="h-3.5 w-3.5 text-[var(--tk-accent)]" /> Website</span> : null}
         </div>
       </div>
-      <ArrowUpRight className="h-5 w-5 shrink-0 text-[var(--tk-muted)] transition group-hover:text-[var(--tk-accent)]" />
     </Link>
   )
 }

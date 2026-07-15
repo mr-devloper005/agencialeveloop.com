@@ -220,21 +220,22 @@ function ListingDetail({ post, related }: { post: SitePost; related: SitePost[] 
   const website = getField(post, ['website', 'url'])
   const mapSrc = mapSrcFor(post)
   return (
-    <section className="mx-auto max-w-[var(--editable-container)] px-6 py-14 sm:py-20 lg:px-8">
-      <BackLink task="listing" />
-      <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px]">
+    <section className="bg-[#f4f7f6] px-6 py-12 sm:py-16 lg:px-8">
+      <div className="mx-auto max-w-[var(--editable-container)]"><BackLink task="listing" /></div>
+      <div className="mx-auto mt-8 grid max-w-[var(--editable-container)] gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
         <article className="min-w-0">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-            <div className="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-raised)]">
+          <div className="relative flex flex-col gap-6 overflow-hidden rounded-3xl bg-[#0B0909] p-7 text-white shadow-[0_28px_80px_rgba(46,69,64,.16)] sm:flex-row sm:items-center sm:p-9">
+            <div className="editable-glow absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[#408175]/35 blur-3xl" />
+            <div className="relative flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-white/15 bg-white shadow-xl">
               {logo ? <img src={logo} alt="" className="h-full w-full object-cover" /> : <Building2 className="h-12 w-12 text-[var(--tk-muted)]" />}
             </div>
-            <div className="min-w-0">
-              <Kicker task="listing">Business listing</Kicker>
-              <h1 className="editable-display mt-4 text-4xl font-semibold leading-[1.04] tracking-[-0.03em] sm:text-5xl">{post.title}</h1>
-              <DetailMeta post={post} category={getField(post, ['category'])} />
+            <div className="relative min-w-0">
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#B5B9F0]">Verified business profile</p>
+              <h1 className="editable-display mt-4 text-4xl font-extrabold leading-[1.04] tracking-[-0.04em] text-white sm:text-5xl">{post.title}</h1>
+              <div className="mt-3 [&_*]:text-white/65"><DetailMeta post={post} category={getField(post, ['category'])} /></div>
             </div>
           </div>
-          {leadText(post) ? <p className="mt-7 max-w-2xl text-lg leading-8 text-[var(--tk-muted)]">{leadText(post)}</p> : null}
+          {leadText(post) ? <p className="mt-7 rounded-3xl border border-[var(--tk-line)] bg-white p-7 text-lg font-medium leading-8 shadow-[0_18px_50px_rgba(46,69,64,.06)]">{leadText(post)}</p> : null}
           <InfoGrid items={[['Location', address, MapPin], ['Phone', phone, Phone], ['Email', email, Mail], ['Website', website, Globe2]]} />
           <Divider />
           <BodyContent post={post} />
@@ -242,7 +243,6 @@ function ListingDetail({ post, related }: { post: SitePost; related: SitePost[] 
         </article>
         <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
           {mapSrc ? <MapBox src={mapSrc} label={address || post.title} /> : null}
-          <ContactAction website={website} phone={phone} email={email} />
           <RelatedPanel task="listing" post={post} related={related} />
         </aside>
       </div>
@@ -293,7 +293,7 @@ function ClassifiedDetail({ post, related }: { post: SitePost; related: SitePost
 // ----- Image: a dark, gallery-led canvas -----
 function ImageDetail({ post, related }: { post: SitePost; related: SitePost[] }) {
   const images = getImages(post)
-  const gallery = images.length ? images : ['/placeholder.svg?height=900&width=1200']
+  const gallery = images.length ? images : ['/favicon.png?v=20260413']
   return (
     <>
       <section className="mx-auto max-w-[var(--editable-container)] px-6 py-14 sm:py-20 lg:px-8">
@@ -567,4 +567,3 @@ function RelatedCard({ task, post, grid = false }: { task: TaskKey; post: SitePo
     </Link>
   )
 }
-
