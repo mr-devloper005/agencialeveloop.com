@@ -3,19 +3,10 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import Image from 'next/image'
 import { Building2, Menu, Moon, Search, X, User } from 'lucide-react'
 import { SITE_CONFIG } from '@/lib/site-config'
 import { useEditableLocalAuthSession } from '@/editable/components/EditableLocalAuthForms'
-
-const LOGO_SVG = (
-  <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 shrink-0">
-    <rect x="2" y="9" width="11" height="15" rx="2" fill="#2563eb" fillOpacity="0.7" />
-    <rect x="9" y="4" width="21" height="21" rx="2" fill="#2563eb" />
-    <line x1="13" y1="10" x2="26" y2="10" stroke="white" strokeWidth="2" strokeLinecap="round" />
-    <line x1="13" y1="15" x2="26" y2="15" stroke="white" strokeWidth="2" strokeLinecap="round" />
-    <line x1="13" y1="20" x2="21" y2="20" stroke="white" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-)
 
 export function EditableNavbar() {
   const [open, setOpen] = useState(false)
@@ -40,7 +31,7 @@ export function EditableNavbar() {
       <nav className="mx-auto flex h-[64px] w-full max-w-[1280px] items-center gap-3 px-4 sm:px-6">
         {/* Logo */}
         <Link href="/" className="mr-3 flex shrink-0 items-center gap-2">
-          {LOGO_SVG}
+          <Image src="/favicon.png" alt={SITE_CONFIG.name} width={64} height={64} className="h-[64px] w-[64px] shrink-0 object-contain" />
           <span className="hidden text-[17px] font-bold tracking-tight text-gray-900 sm:block">
             {SITE_CONFIG.name}
           </span>
