@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { BookOpen, Check, Clock3, Eye, Heart, MessageCircle, Users } from 'lucide-react'
 import type { SitePost } from '@/lib/site-connector'
-import type { HomeTimeSection } from '@/lib/task-data'
+import { type HomeTimeSection, getPostTaskKey } from '@/lib/task-data'
 import type { TaskKey } from '@/lib/site-config'
 import { SITE_CONFIG } from '@/lib/site-config'
 import { getEditablePostImage, postHref, toPlainText } from '@/editable/cards/PostCards'
@@ -46,6 +46,12 @@ function stableViewCount(post: SitePost) {
 function readTime(post: SitePost) {
   const words = getExcerpt(post, 10000).split(/\s+/).length
   return Math.max(1, Math.round(words / 200))
+}
+
+const ALLOWED_TASKS = new Set(['article', 'listing'])
+
+function onlyAllowed(posts: SitePost[]) {
+  return posts.filter((post) => { const key = getPostTaskKey(post); return key && ALLOWED_TASKS.has(key) })
 }
 
 function dedupePosts(posts: SitePost[]) {
@@ -113,7 +119,7 @@ function AuthorAvatar({ name, size = 'md' }: { name: string; size?: 'xs' | 'sm' 
 
 /* ─── Hero: dark background + carousel ───────────────────────────────────── */
 export function EditableHomeHero({ primaryTask, primaryRoute, posts, timeSections }: HomeSectionProps) {
-  const pool = dedupePosts([...posts, ...timeSections.flatMap((s) => s.posts)])
+  const pool = dedupePosts(onlyAllowed([...posts, ...timeSections.flatMap((s) => s.posts)]))
   const carouselPosts = pool.slice(0, 8)
 
   return (
@@ -253,7 +259,7 @@ export function EditableStoryRail(_props: HomeSectionProps) {
 
 /* ─── Editor's Pick + Hot Right Now ─────────────────────────────────────── */
 export function EditableMagazineSplit({ primaryTask, primaryRoute, posts, timeSections }: HomeSectionProps) {
-  const all = dedupePosts([...posts, ...timeSections.flatMap((s) => s.posts)])
+  const all = dedupePosts(onlyAllowed([...posts, ...timeSections.flatMap((s) => s.posts)]))
   const featured = all[0]
   const hotList = all.slice(1, 9)
 
@@ -468,7 +474,7 @@ function AuthorCard({ authorName, postCount }: { authorName: string; postCount: 
 
 /* ─── Editor Verified + Writer CTA + Stats + Authors + Latest Posts ──────── */
 export function EditableTimeCollections({ primaryTask, primaryRoute, posts, timeSections }: HomeSectionProps) {
-  const all = dedupePosts([...posts, ...timeSections.flatMap((s) => s.posts)])
+  const all = dedupePosts(onlyAllowed([...posts, ...timeSections.flatMap((s) => s.posts)]))
   const verifiedPosts = all.slice(0, 3)
   const latestPosts = all.slice(0, 8)
 
