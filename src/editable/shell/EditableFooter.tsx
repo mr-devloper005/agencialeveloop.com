@@ -4,15 +4,7 @@ import Link from 'next/link'
 import { SITE_CONFIG } from '@/lib/site-config'
 import { useEditableLocalAuthSession } from '@/editable/components/EditableLocalAuthForms'
 
-const LOGO_SVG = (
-  <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 shrink-0">
-    <rect x="2" y="9" width="11" height="15" rx="2" fill="#2563eb" fillOpacity="0.7" />
-    <rect x="9" y="4" width="21" height="21" rx="2" fill="#2563eb" />
-    <line x1="13" y1="10" x2="26" y2="10" stroke="white" strokeWidth="2" strokeLinecap="round" />
-    <line x1="13" y1="15" x2="26" y2="15" stroke="white" strokeWidth="2" strokeLinecap="round" />
-    <line x1="13" y1="20" x2="21" y2="20" stroke="white" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-)
+const LOGO_IMG = <img src="/favicon.png?v=20260413" alt={SITE_CONFIG.name} className="h-8 w-8 shrink-0 object-contain" />
 
 function TwitterX() {
   return (
@@ -57,7 +49,7 @@ export function EditableFooter() {
         <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            {LOGO_SVG}
+            {LOGO_IMG}
             <span className="text-xl font-bold text-gray-900">{SITE_CONFIG.name}</span>
           </Link>
 
